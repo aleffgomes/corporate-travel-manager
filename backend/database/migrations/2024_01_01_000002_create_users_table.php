@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\RoleModel;
+use App\Models\UserModel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -20,6 +22,13 @@ return new class extends Migration
 
             $table->index('role_id');
         });
+
+        UserModel::create([
+            'name' => 'Administrator',
+            'email' => 'admin@corporatetravel.com',
+            'password' => Hash::make('admin123'),
+            'role_id' => RoleModel::ADMIN_ID,
+        ]);
     }
 
     public function down(): void

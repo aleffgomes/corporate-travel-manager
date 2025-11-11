@@ -2,6 +2,11 @@
 
 API REST para gerenciamento de viagens corporativas.
 
+## Login Admin
+
+Admin: `admin@corporatetravel.com`
+password: `admin123`
+
 ## Tecnologias
 
 - **Laravel**
@@ -80,7 +85,7 @@ O projeto inclui seeders para popular o banco com dados de exemplo:
 # - 4 status (pending, approved, rejected, cancelled)
 
 # Para popular banco com dados fictícios:
-docker exec -it corporate-travel-manager-backend-1 php artisan db:seed DatabaseSeeder
+docker exec -it ctm-backend php artisan db:seed DatabaseSeeder
 
 ```
 

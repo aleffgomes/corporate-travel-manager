@@ -31,12 +31,16 @@
 
         <DataTable 
           :value="requests" 
-          :loading="loading || loadingMore"
-          :paginator="false"
+          :loading="loading"
+          :paginator="true"
+          :rows="15"
+          :totalRecords="totalRecords"
+          :lazy="true"
+          @page="onPage"
+          :rowsPerPageOptions="[10, 15, 25, 50]"
           stripedRows
-          scrollable
-          scrollHeight="600px"
-          @scroll="onScroll"
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} solicitações"
         >
           <Column field="destination" header="Destino" sortable>
             <template #body="{ data }">
@@ -171,7 +175,6 @@ import TravelRequestDeleteDialog from '@/components/travel/TravelRequestDeleteDi
 
 const toast = useToast()
 const loading = ref(false)
-const loadingMore = ref(false)
 const submitting = ref(false)
 const requests = ref<TravelRequest[]>([])
 const selectedStatus = ref<string | null>(null)
@@ -183,7 +186,8 @@ const statusAction = ref<'approve' | 'reject'>('approve')
 
 // Paginação
 const currentPage = ref(1)
-const lastPage = ref(1)
+const rowsPerPage = ref(15)
+const totalRecords = ref(0)
 
 const statusOptions = [
   { label: 'Todos', value: null },
@@ -213,33 +217,21 @@ const getStatusSeverity = (status: string) => {
   return severities[status] || 'info'
 }
 
-const loadRequests = async (append = false) => {
-  if (!append) {
-    loading.value = true
-    currentPage.value = 1
-    requests.value = []
-  } else {
-    loadingMore.value = true
-  }
+const loadRequests = async () => {
+  loading.value = true
   
   try {
     const response = await travelService.getAll({
       page: currentPage.value,
-      per_page: 15,
+      per_page: rowsPerPage.value,
       my_requests: false,
       status: selectedStatus.value || undefined
     })
     
-    if (append) {
-      const existingIds = new Set(requests.value.map(r => r.id))
-      const newItems = response.data.filter(item => !existingIds.has(item.id))
-      requests.value = [...requests.value, ...newItems]
-    } else {
-      requests.value = response.data
-    }
+    requests.value = response.data
     
     if (response.pagination) {
-      lastPage.value = response.pagination.last_page
+      totalRecords.value = response.pagination.total
     }
   } catch (error) {
     toast.add({
@@ -250,24 +242,13 @@ const loadRequests = async (append = false) => {
     })
   } finally {
     loading.value = false
-    loadingMore.value = false
   }
 }
 
-const loadMore = async () => {
-  if (loadingMore.value || loading.value || currentPage.value >= lastPage.value) return
-  
-  currentPage.value++
-  await loadRequests(true)
-}
-
-const onScroll = (event: any) => {
-  const { scrollTop, scrollHeight, clientHeight } = event.target
-  const threshold = 100
-  
-  if (scrollHeight - scrollTop - clientHeight < threshold) {
-    loadMore()
-  }
+const onPage = (event: any) => {
+  currentPage.value = event.page + 1
+  rowsPerPage.value = event.rows
+  loadRequests()
 }
 
 const viewRequest = (request: TravelRequest) => {
@@ -342,7 +323,8 @@ const handleDelete = async () => {
 }
 
 watch(selectedStatus, () => {
-  loadRequests(false)
+  currentPage.value = 1
+  loadRequests()
 })
 
 onMounted(() => {

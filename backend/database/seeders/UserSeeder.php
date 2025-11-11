@@ -14,14 +14,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin User
-        UserModel::create([
-            'name' => 'Administrator',
-            'email' => 'admin@corporatetravel.com',
-            'password' => Hash::make('admin123'),
-            'role_id' => RoleModel::ADMIN_ID,
-        ]);
-
         // Regular Users
         UserModel::create([
             'name' => 'John Doe',

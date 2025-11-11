@@ -35,6 +35,9 @@ echo "Executando migrations..."
 php artisan migrate --force --no-interaction
 echo " Migrations executadas"
 
+echo "Iniciando Queue Worker"
+php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600 &
+
 echo "Servidor Laravel iniciando..."
 
 exec php artisan serve --host=0.0.0.0 --port=8000
