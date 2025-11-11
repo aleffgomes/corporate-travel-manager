@@ -99,8 +99,7 @@ Todas as configurações estão no arquivo `.env`
 
 - Base: `bitnami/laravel:latest`
 - JWT pré-instalado
-- Hot reload com volumes
-
+- 
 ### Frontend (Vue.js)
 
 - Base: `node:20-alpine`
