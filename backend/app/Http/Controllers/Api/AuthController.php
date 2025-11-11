@@ -31,13 +31,79 @@ class AuthController extends ApiController
         );
     }
 
-    public function login()
+    public function login(Request $request)
     {
-        return $this->successResponse(null, 'User logged in successfully', 200);
+    $result = $this->authService->login($request->all());
+
+        if (!$result['success']) {
+            return $this->errorResponse(
+                $result['message'],
+                400,
+                $result['errors'] ?? null
+            );
+        }
+
+        return $this->successResponse(
+            $result['data'],
+            $result['message'],
+            201
+        );
     }
 
     public function logout()
     {
-        return $this->successResponse(null, 'User logged out successfully', 200);
+        $result = $this->authService->logout();
+
+        if (!$result['success']) {
+            return $this->errorResponse(
+                $result['message'],
+                400,
+                $result['errors'] ?? null
+            );
+        }
+
+        return $this->successResponse(
+            null,
+            $result['message'],
+            200
+        );
+    }
+
+    public function refresh()
+    {
+        $result = $this->authService->refresh();
+
+        if (!$result['success']) {
+            return $this->errorResponse(
+                $result['message'],
+                400,
+                $result['errors'] ?? null
+            );
+        }
+
+        return $this->successResponse(
+            $result['data'],
+            $result['message'],
+            200
+        );
+    }
+
+    public function me()
+    {
+        $result = $this->authService->me();
+
+        if (!$result['success']) {
+            return $this->errorResponse(
+                $result['message'],
+                400,
+                $result['errors'] ?? null
+            );
+        }
+
+        return $this->successResponse(
+            $result['data'],
+            $result['message'],
+            200
+        );
     }
 }

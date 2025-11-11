@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -18,6 +20,7 @@ class UserModel extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     protected $hidden = [
@@ -29,6 +32,21 @@ class UserModel extends Authenticatable implements JWTSubject
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(RoleModel::class, 'role_id');
+    }
+
+    public function travelRequests(): HasMany
+    {
+        return $this->hasMany(TravelRequestModel::class, 'user_id');
+    }
+
+    public function approvedTravelRequests(): HasMany
+    {
+        return $this->hasMany(TravelRequestModel::class, 'approved_by');
     }
 
     public function getJWTIdentifier()

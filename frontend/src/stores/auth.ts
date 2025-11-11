@@ -1,18 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services/auth.service'
+import { StorageManager } from '@/utils/storageManager'
 import type { User, LoginCredentials, RegisterData } from '@/types'
 
-const TOKEN_KEY = 'token'
-const USER_KEY = 'user'
-
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem(TOKEN_KEY) || null)
-  const user = ref<User | null>(JSON.parse(localStorage.getItem(USER_KEY) || 'null'))
+  const token = ref<string | null>(StorageManager.getToken())
+  const user = ref<User | null>(StorageManager.getUser())
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
-  const isAuthenticated = computed(() => !!token.value)
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
 
   async function login(credentials: LoginCredentials): Promise<boolean> {
     loading.value = true
@@ -20,11 +18,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await authService.login(credentials)
+      
       token.value = response.data.token
       user.value = response.data.user
-      
-      localStorage.setItem(TOKEN_KEY, token.value)
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
       
       return true
     } catch (err: any) {
@@ -41,11 +37,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await authService.register(userData)
+      
       token.value = response.data.token
       user.value = response.data.user
-      
-      localStorage.setItem(TOKEN_KEY, token.value)
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
       
       return true
     } catch (err: any) {
@@ -66,8 +60,6 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
       loading.value = false
     }
   }
@@ -76,10 +68,64 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authService.getProfile()
       user.value = response.data
-      localStorage.setItem(USER_KEY, JSON.stringify(user.value))
     } catch (err) {
       console.error('Failed to refresh profile:', err)
     }
+  }
+
+  async function validateToken(): Promise<boolean> {
+    if (!token.value) {
+      return false
+    }
+
+    try {
+      const isValid = await authService.validateToken()
+      
+      if (isValid) {
+        user.value = StorageManager.getUser()
+        return true
+      } else {
+        token.value = null
+        user.value = null
+        return false
+      }
+    } catch {
+      token.value = null
+      user.value = null
+      return false
+    }
+  }
+
+  async function refreshToken(): Promise<boolean> {
+    if (!token.value) {
+      return false
+    }
+
+    loading.value = true
+    
+    try {
+      const response = await authService.refresh()
+      
+      if (response) {
+        token.value = response.data.token
+        user.value = response.data.user
+        return true
+      }
+      
+      return false
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'Token refresh failed'
+      token.value = null
+      user.value = null
+      return false
+    } finally {
+      loading.value = false
+    }
+  }
+
+  function syncWithStorage(): void {
+    token.value = StorageManager.getToken()
+    user.value = StorageManager.getUser()
   }
 
   return {
@@ -91,6 +137,9 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    refreshProfile
+    refreshProfile,
+    validateToken,
+    refreshToken,
+    syncWithStorage
   }
 })

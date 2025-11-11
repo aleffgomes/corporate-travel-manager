@@ -2,6 +2,7 @@
 
 namespace App\Domain;
 
+use App\Models\RoleModel;
 use App\Models\UserModel as User;
 
 class UserDomain
@@ -9,6 +10,7 @@ class UserDomain
     private int $id;
     private string $name;
     private string $email;
+    private string $role;
     private string $createdAt;
     private string $updatedAt;
 
@@ -16,12 +18,14 @@ class UserDomain
         int $id,
         string $name,
         string $email,
+        string $role,
         string $createdAt,
         string $updatedAt
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->email = $email;
+        $this->role = $role;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
     }
@@ -32,6 +36,7 @@ class UserDomain
             $user->id,
             $user->name,
             $user->email,
+            $user->relationLoaded('role') && $user->role ? $user->role->name : RoleModel::USER,
             $user->created_at->toIso8601String(),
             $user->updated_at->toIso8601String()
         );
@@ -43,6 +48,7 @@ class UserDomain
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'role' => $this->role,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
         ];

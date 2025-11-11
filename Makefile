@@ -19,8 +19,6 @@ start:
 	@echo "Iniciando containers..."
 	@docker compose up -d --build
 	@echo ""
-	@echo "Projeto rodando!"
-	@echo ""
 	@$(MAKE) status
 
 stop:

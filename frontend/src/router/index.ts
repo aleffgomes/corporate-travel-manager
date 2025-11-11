@@ -1,13 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import AppLayout from '@/layouts/AppLayout.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'home',
-    component: () => import('@/pages/HomePage.vue'),
-    meta: { requiresAuth: true }
+    component: AppLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/pages/DashboardPage.vue')
+      },
+      {
+        path: '/travel-requests',
+        name: 'travel-requests',
+        component: () => import('@/pages/TravelRequestsPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
+      }
+    ]
   },
   {
     path: '/login',
@@ -33,12 +46,25 @@ const router = createRouter({
   routes
 })
 
+let isValidatingToken = false
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+
+  if (authStore.isAuthenticated && !isValidatingToken) {
+    isValidatingToken = true
+    const isValid = await authStore.validateToken()
+    isValidatingToken = false
+    
+    if (!isValid && to.meta.requiresAuth) {
+      return next({ name: 'login' })
+    }
+  }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login' })
+  } else if (to.meta.requiresAdmin && authStore.user?.role !== 'admin') {
+    next({ name: 'home' })
   } else if (to.meta.guest && authStore.isAuthenticated) {
     next({ name: 'home' })
   } else {

@@ -7,13 +7,19 @@ use Illuminate\Routing\Controller;
 
 abstract class ApiController extends Controller
 {
-    protected function successResponse(mixed $data, string $message = 'Success', int $statusCode = 200): JsonResponse
+    protected function successResponse(mixed $data, string $message = 'Success', int $statusCode = 200, ?array $pagination = null): JsonResponse
     {
-        return response()->json([
+        $response = [
             'success' => true,
             'message' => $message,
             'data' => $data,
-        ], $statusCode);
+        ];
+
+        if ($pagination) {
+            $response['pagination'] = $pagination;
+        }
+
+        return response()->json($response, $statusCode);
     }
 
     protected function errorResponse(string $message, int $statusCode = 400, mixed $errors = null): JsonResponse

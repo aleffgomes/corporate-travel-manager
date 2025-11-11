@@ -19,12 +19,16 @@ if grep -q "APP_KEY=$" .env || ! grep -q "APP_KEY=" .env; then
   echo "Gerando APP_KEY..."
   php artisan key:generate --force --no-interaction
   echo " APP_KEY gerado"
+else
+  echo " APP_KEY já configurado"
 fi
 
 if grep -q "JWT_SECRET=$" .env || ! grep -q "JWT_SECRET=" .env; then
   echo "Gerando JWT_SECRET..."
   php artisan jwt:secret --force --no-interaction
   echo " JWT_SECRET gerado"
+else
+  echo " JWT_SECRET já configurado"
 fi
 
 echo "Executando migrations..."

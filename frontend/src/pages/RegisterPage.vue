@@ -1,107 +1,137 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4">
-    <div class="card max-w-md w-full">
-      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Cadastro</h1>
-      
-      <form @submit.prevent="handleRegister" class="space-y-5">
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-            Nome
-          </label>
-          <input
-            id="name"
-            v-model="form.name"
-            type="text"
-            required
-            placeholder="Seu nome"
-            class="input-field"
-          />
-        </div>
-
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            Email
-          </label>
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            required
-            placeholder="seu@email.com"
-            class="input-field"
-          />
-        </div>
-
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-            Senha
-          </label>
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            required
-            placeholder="••••••••"
-            minlength="6"
-            class="input-field"
-          />
-          <div v-if="form.password" class="mt-2 space-y-1">
-            <p class="text-xs" :class="hasMinLength ? 'text-green-600' : 'text-red-600'">
-              {{ hasMinLength ? '' : 'Mínimo 6 caracteres' }} 
-            </p>
-            <p class="text-xs" :class="hasLetters ? 'text-green-600' : 'text-red-600'">
-              {{ hasLetters ? '' : 'Deve conter letras' }} 
-            </p>
-            <p class="text-xs" :class="hasNumbers ? 'text-green-600' : 'text-red-600'">
-              {{ hasNumbers ? '' : 'Deve conter números' }} 
-            </p>
+  <div class="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 px-4 py-8">
+    
+    <Card class="w-full max-w-md shadow-2xl">
+      <template #header>
+        <div class="text-center pt-6 px-6">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/50 mb-4">
+            <i class="pi pi-user-plus text-3xl text-primary-700 dark:text-primary-100"></i>
           </div>
+          <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-500">Criar Conta</h1>
+          <p class="text-slate-600 dark:text-slate-400 mt-2 text-base">Preencha seus dados para começar</p>
         </div>
+      </template>
+      
+      <template #content>
+        <form @submit.prevent="handleRegister" class="space-y-4 px-2">
+          <div class="flex flex-col gap-2">
+            <label for="name" class="font-semibold text-slate-800 dark:text-slate-500 text-sm">Nome Completo</label>
+            <InputText 
+              id="name" 
+              v-model="form.name" 
+              placeholder="Digite seu nome"
+              :invalid="!!error"
+              size="large"
+              required
+            />
+          </div>
 
-        <div>
-          <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-            Confirmar Senha
-          </label>
-          <input
-            id="password_confirmation"
-            v-model="form.password_confirmation"
-            type="password"
-            required
-            placeholder="••••••••"
-            class="input-field"
+          <div class="flex flex-col gap-2">
+            <label for="email" class="font-semibold text-slate-800 dark:text-slate-500 text-sm">Email</label>
+            <InputText 
+              id="email" 
+              v-model="form.email" 
+              type="email" 
+              placeholder="seu@email.com"
+              :invalid="!!error"
+              size="large"
+              required
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="password" class="font-semibold text-slate-800 dark:text-slate-500 text-sm">Senha</label>
+            <Password 
+              id="password" 
+              v-model="form.password" 
+              placeholder="Crie uma senha"
+              toggleMask
+              :invalid="!!error"
+              inputClass="w-full"
+              required
+            >
+              <template #footer>
+                <Divider />
+                <p class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-500">Requisitos:</p>
+                <ul class="pl-2 ml-2 text-sm space-y-1">
+                  <li :class="hasMinLength ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400'">
+                    <i :class="hasMinLength ? 'pi pi-check' : 'pi pi-times'"></i>
+                    Mínimo 6 caracteres
+                  </li>
+                  <li :class="hasLetters ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400'">
+                    <i :class="hasLetters ? 'pi pi-check' : 'pi pi-times'"></i>
+                    Conter letras
+                  </li>
+                  <li :class="hasNumbers ? 'text-primary-600 dark:text-primary-400' : 'text-slate-600 dark:text-slate-400'">
+                    <i :class="hasNumbers ? 'pi pi-check' : 'pi pi-times'"></i>
+                    Conter números
+                  </li>
+                </ul>
+              </template>
+            </Password>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="password_confirmation" class="font-semibold text-slate-800 dark:text-slate-500 text-sm">Confirmar Senha</label>
+            <Password 
+              id="password_confirmation" 
+              v-model="form.password_confirmation" 
+              placeholder="Digite a senha novamente"
+              :feedback="false"
+              toggleMask
+              :invalid="!!(form.password_confirmation && !passwordsMatch)"
+              inputClass="w-full"
+              required
+            />
+            <small v-if="form.password_confirmation && !passwordsMatch" class="text-red-600 font-medium">
+              As senhas não conferem
+            </small>
+          </div>
+
+          <Message v-if="error" severity="error" :closable="false" class="text-sm">{{ error }}</Message>
+
+          <Button 
+            type="submit" 
+            label="Cadastrar" 
+            icon="pi pi-user-plus" 
+            :loading="loading"
+            :disabled="!isFormValid"
+            size="large"
+            class="w-full mt-6"
           />
-          <p v-if="form.password_confirmation && !passwordsMatch" class="mt-2 text-xs text-red-600">
-            Senhas não conferem
-          </p>
+        </form>
+      </template>
+
+      <template #footer>
+        <div class="text-center text-sm text-slate-600 dark:text-slate-400 pb-2">
+          Já tem conta? 
+          <router-link to="/login" class="text-primary-700 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-semibold">
+            Entrar
+          </router-link>
         </div>
-
-        <div v-if="authStore.error" class="error-message">
-          {{ authStore.error }}
-        </div>
-
-        <button type="submit" :disabled="authStore.loading" class="btn-primary">
-          {{ authStore.loading ? 'Cadastrando...' : 'Cadastrar' }}
-        </button>
-      </form>
-
-      <p class="text-center mt-6 text-gray-600">
-        Já tem conta? 
-        <RouterLink to="/login" class="text-primary-600 hover:text-primary-700 font-medium">
-          Entrar
-        </RouterLink>
-      </p>
-    </div>
+      </template>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { reactive, computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useTheme } from '@/composables/useTheme'
 import type { RegisterData } from '@/types'
+import Card from 'primevue/card'
+import InputText from 'primevue/inputtext'
+import Password from 'primevue/password'
+import Button from 'primevue/button'
+import Message from 'primevue/message'
+import Divider from 'primevue/divider'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { isDark, toggleTheme } = useTheme()
+const loading = ref(false)
+const error = ref('')
 
 const form = reactive<RegisterData>({
   name: '',
@@ -125,13 +155,21 @@ const isFormValid = computed(() =>
 
 async function handleRegister() {
   if (!isFormValid.value) {
-    authStore.error = 'Verifique os dados e tente novamente.'
+    error.value = 'Verifique os dados e tente novamente.'
     return
   }
 
+  loading.value = true
+  error.value = ''
+  
   const success = await authStore.register(form)
+  
   if (success) {
     router.push({ name: 'home' })
+  } else {
+    error.value = authStore.error || 'Erro ao criar conta'
   }
+  
+  loading.value = false
 }
 </script>

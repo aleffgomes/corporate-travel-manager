@@ -72,7 +72,6 @@ make test
 tests/
 └── Unit/
     └── Services/
-        └── AuthServiceTest.php
 ```
 
 ## Arquitetura
@@ -80,8 +79,10 @@ tests/
 ```plaintext
 ├── backend/
 │   └── Dockerfile
+│   └── docker-entrypoint.sh
 ├── frontend/
 │   └── Dockerfile
+│   └── docker-entrypoint.sh
 ├── .env
 ├── .env.example
 ├── docker-compose.yml
@@ -96,7 +97,7 @@ Todas as configurações estão no arquivo `.env`
 
 ### Backend (Laravel)
 
-- Base: `bitnami/laravel:11`
+- Base: `bitnami/laravel:latest`
 - JWT pré-instalado
 - Hot reload com volumes
 
@@ -106,8 +107,9 @@ Todas as configurações estão no arquivo `.env`
 - Vite + HMR
 - ESLint + Prettier
 
-### Queue Worker
+## Documentação Detalhada
 
-- Base: `bitnami/laravel:11`
-- Redis queue
-- Auto-restart
+Para mais informações sobre cada parte do projeto, consulte:
+
+- **[Backend README](./backend/README.md)** - Arquitetura, rotas da API, seeders e padrões de design
+- **[Frontend README](./frontend/README.md)** - Estrutura, componentes e funcionalidades da interface
